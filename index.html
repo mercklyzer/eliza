@@ -1135,9 +1135,22 @@ initParticles();
    PRELOAD IMAGES
    Start fetching images in background for instant reveals
 ========================================================== */
-TULIP_DATA.forEach(data => {
-  const img = new Image();
-  img.src = data.image;
+const preloadImages = () => {
+  TULIP_DATA.forEach(data => {
+    const img = new Image();
+    img.src = data.image;
+    // Basic check to see if it's hitting the phone
+    img.onerror = () => console.log("Mobile failed to load: " + data.image);
+  });
+};
+
+window.addEventListener('load', () => {
+  preloadImages();
+
+  setTimeout(() => {
+    initParticles();
+    console.log("Particles started after images queued.");
+  }, 1000);
 });
 </script>
 
