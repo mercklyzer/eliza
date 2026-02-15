@@ -4,6 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>For Eliza</title>
+  <script>
+    // Fix relative paths on GitHub Pages when URL lacks trailing slash.
+    // Some mobile in-app browsers don't follow the 301 redirect, so
+    // "images/..." resolves against the wrong directory.
+    (function () {
+      var p = window.location.pathname;
+      if (!/\.\w+$/.test(p) && p.charAt(p.length - 1) !== '/') {
+        var b = document.createElement('base');
+        b.href = window.location.origin + p + '/';
+        document.head.appendChild(b);
+      }
+    })();
+  </script>
 
   <!-- Google Fonts: Elegant serif + clean sans-serif pairing -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
