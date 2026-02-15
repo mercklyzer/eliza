@@ -11,9 +11,12 @@
     (function () {
       var p = window.location.pathname;
       if (!/\.\w+$/.test(p) && p.charAt(p.length - 1) !== '/') {
-        var b = document.createElement('base');
-        b.href = window.location.origin + p + '/';
-        document.head.appendChild(b);
+        // Avoid injecting a <base> tag (can cause iOS Safari / in-app browsers
+        // to resolve dynamically-set image src unexpectedly).
+        // Instead, compute a base prefix and resolve URLs at usage time.
+        window.__BASE_PATH_PREFIX__ = window.location.origin + p + '/';
+      } else {
+        window.__BASE_PATH_PREFIX__ = '';
       }
     })();
   </script>
@@ -291,7 +294,6 @@
       max-width: 520px;
       width: min(520px, calc(100vw - 2rem));
       max-height: 90vh;
-      max-height: 90dvh;
       display: flex;
       flex-direction: column;
       --tilt-x: 0deg;
@@ -301,6 +303,12 @@
       transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
       contain: layout style;
       overflow: hidden;
+    }
+
+    /* iOS Safari has had intermittent issues with dvh causing 0-height layouts.
+       Use dvh only when supported. */
+    @supports (height: 1dvh) {
+      .lightbox-content { max-height: 90dvh; }
     }
 
     .lightbox-overlay.active .lightbox-content {
@@ -335,9 +343,11 @@
       min-width: 0;
       min-height: 0;
       max-height: calc(90vh - 100px);
-      max-height: calc(90dvh - 100px);
       flex: 0 1 auto;
-      contain: inline-size;
+    }
+
+    @supports (height: 1dvh) {
+      .lightbox-frame img { max-height: calc(90dvh - 100px); }
     }
 
     .lightbox-caption {
@@ -467,7 +477,6 @@
       .lightbox-content {
         width: min(520px, calc(100vw - 1.25rem));
         max-height: 85vh;
-        max-height: 85dvh;
       }
       .lightbox-frame {
         padding: 8px;
@@ -475,12 +484,18 @@
       }
       .lightbox-frame img {
         max-height: calc(85vh - 90px);
-        max-height: calc(85dvh - 90px);
         border-radius: 8px;
       }
       .lightbox-caption {
         padding: 0.7rem 0.5rem 0.4rem;
         font-size: 1rem;
+      }
+    }
+
+    @supports (height: 1dvh) {
+      @media (max-width: 480px) {
+        .lightbox-content { max-height: 85dvh; }
+        .lightbox-frame img { max-height: calc(85dvh - 90px); }
       }
     }
 
@@ -729,6 +744,20 @@ const TULIP_DATA = [
 ];
 
 /* ==========================================================
+   URL RESOLUTION (important for iOS / in-app browsers)
+   Resolve relative asset paths without relying on a <base> tag.
+========================================================== */
+function resolveAssetURL(path) {
+  try {
+    if (/^https?:\/\//i.test(path)) return path;
+    const base = window.__BASE_PATH_PREFIX__ || window.location.href;
+    return new URL(path, base).href;
+  } catch (_) {
+    return path;
+  }
+}
+
+/* ==========================================================
    TULIP COLOR PALETTES
    Each tulip gets a unique but harmonizing color scheme
 ========================================================== */
@@ -955,6 +984,8 @@ let lightboxShowTimeoutId = null;
 function openLightbox(imageSrc, caption) {
   lightboxCaption.textContent = caption;
 
+  const resolvedSrc = resolveAssetURL(imageSrc);
+
   // New "open" session: invalidate any previous pending callbacks
   lightboxToken++;
   const token = lightboxToken;
@@ -975,7 +1006,7 @@ function openLightbox(imageSrc, caption) {
   };
 
   // If already loaded (cached), show immediately
-  if (lightboxImg.src === imageSrc && lightboxImg.complete && lightboxImg.naturalWidth > 0) {
+  if (lightboxImg.src === resolvedSrc && lightboxImg.complete && lightboxImg.naturalWidth > 0) {
     showOnce();
     return;
   }
@@ -1006,7 +1037,7 @@ function openLightbox(imageSrc, caption) {
     showOnce();
   }, 1500);
 
-  lightboxImg.src = imageSrc;
+  lightboxImg.src = resolvedSrc;
 }
 
 function closeLightbox() {
@@ -1138,7 +1169,7 @@ initParticles();
 const preloadImages = () => {
   TULIP_DATA.forEach(data => {
     const img = new Image();
-    img.src = data.image;
+    img.src = resolveAssetURL(data.image);
     // Basic check to see if it's hitting the phone
     img.onerror = () => console.log("Mobile failed to load: " + data.image);
   });
