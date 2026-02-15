@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For You — A Bouquet That Blooms Forever</title>
+
+  <!-- Google Fonts: Elegant serif + clean sans-serif pairing -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Nunito:wght@300;400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ========================================================
+       RESET & BASE
+    ======================================================== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: #5a3a3a;
+      overflow-x: hidden;
+      min-height: 100vh;
+      background: #fdf6f0;
+    }
+
+    /* ========================================================
+       ANIMATED GRADIENT BACKGROUND
+       Soft warm romantic gradient that slowly shifts
+    ======================================================== */
+    .bg-gradient {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background: linear-gradient(
+        135deg,
+        #fdf6f0 0%,
+        #fce4ec 25%,
+        #fdf6f0 50%,
+        #f8e8e0 75%,
+        #fce4ec 100%
+      );
+      background-size: 400% 400%;
+      animation: gradientShift 20s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Soft radial glow overlay */
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(ellipse at 50% 40%, rgba(255, 182, 193, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ========================================================
+       FLOATING PARTICLES / SPARKLES
+    ======================================================== */
+    .particles-container {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    /* Fixed FX layer to ensure particles never affect page scroll */
+    .fx-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    /* ========================================================
+       LAYOUT
+    ======================================================== */
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    /* ========================================================
+       HEADER / HEADLINE
+    ======================================================== */
+    .header {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      max-width: 700px;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+    }
+
+    .header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: clamp(1.8rem, 5vw, 3.2rem);
+      line-height: 1.3;
+      color: #8b4a5e;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .header .subtitle {
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(0.85rem, 2vw, 1.05rem);
+      color: #b07a8a;
+      font-weight: 300;
+      letter-spacing: 0.03em;
+    }
+
+    .header .divider {
+      width: 60px;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, #d4929e, transparent);
+      margin: 1.5rem auto 0;
+    }
+
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========================================================
+       INSTRUCTION HINT
+    ======================================================== */
+    .hint {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #c4959f;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) 1.2s forwards;
+      font-style: italic;
+    }
+
+    /* ========================================================
+       BOUQUET CONTAINER
+    ======================================================== */
+    .bouquet-section {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 2rem 0;
+      opacity: 0;
+      animation: fadeInUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.8s forwards;
+    }
+
+    .bouquet {
+      position: relative;
+      width: 100%;
+      max-width: 750px;
+      height: 520px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    /* ========================================================
+       TULIP STYLES
+       Each tulip is an SVG rendered inline for full control
+    ======================================================== */
+    .tulip-wrapper {
+      position: absolute;
+      bottom: 0;
+      cursor: pointer;
+      transition: filter 0.3s ease;
+      will-change: transform;
+    }
+
+    .tulip-wrapper:hover {
+      filter: brightness(1.08) drop-shadow(0 0 20px rgba(219, 112, 147, 0.3));
+    }
+
+    .tulip-wrapper.bloomed {
+      pointer-events: none;
+    }
+
+    .tulip-svg {
+      overflow: visible;
+      display: block;
+    }
+
+    /* Idle wind sway — each tulip gets a slightly different delay */
+    .tulip-wrapper {
+      animation: windSway 4s ease-in-out infinite;
+      transform-origin: bottom center;
+    }
+    .tulip-wrapper:nth-child(2) { animation-delay: -0.5s; animation-duration: 4.3s; }
+    .tulip-wrapper:nth-child(3) { animation-delay: -1.2s; animation-duration: 3.8s; }
+    .tulip-wrapper:nth-child(4) { animation-delay: -0.8s; animation-duration: 4.6s; }
+    .tulip-wrapper:nth-child(5) { animation-delay: -1.5s; animation-duration: 4.1s; }
+    .tulip-wrapper:nth-child(6) { animation-delay: -0.3s; animation-duration: 4.4s; }
+    .tulip-wrapper:nth-child(7) { animation-delay: -1.0s; animation-duration: 3.9s; }
+
+    @keyframes windSway {
+      0%, 100% { transform: rotate(0deg); }
+      25%      { transform: rotate(1.5deg); }
+      75%      { transform: rotate(-1.5deg); }
+    }
+
+    /* Bloom pulse animation */
+    @keyframes bloomPulse {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.15); }
+      70%  { transform: scale(1.05); }
+      100% { transform: scale(1.1); }
+    }
+
+    /* ========================================================
+       PETAL EXPLOSION PARTICLES
+    ======================================================== */
+    .petal {
+      position: absolute;
+      width: 18px;
+      height: 24px;
+      border-radius: 50% 50% 50% 0;
+      opacity: 0;
+      pointer-events: none;
+      will-change: transform, opacity;
+      z-index: 50;
+    }
+
+    /* ========================================================
+       LIGHTBOX / PHOTO MODAL
+    ======================================================== */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(30, 10, 15, 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      transition: background 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      backdrop-filter: blur(0px);
+      -webkit-backdrop-filter: blur(0px);
+      overflow: hidden;
+    }
+
+    .lightbox-overlay.active {
+      background: rgba(30, 10, 15, 0.65);
+      pointer-events: all;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .lightbox-content {
+      position: relative;
+      max-width: 520px;
+      width: min(520px, calc(100vw - 2rem));
+      max-height: 90vh;
+      max-height: 90dvh;
+      display: flex;
+      flex-direction: column;
+      --tilt-x: 0deg;
+      --tilt-y: 0deg;
+      transform: scale(0.7) translateY(40px) perspective(1000px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+      opacity: 0;
+      transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+      contain: layout style;
+      overflow: hidden;
+    }
+
+    .lightbox-overlay.active .lightbox-content {
+      transform: scale(1) translateY(0) perspective(1000px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+      opacity: 1;
+    }
+
+    .lightbox-frame {
+      position: relative;
+      background: #fff;
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow:
+        0 25px 60px rgba(100, 40, 60, 0.25),
+        0 10px 25px rgba(100, 40, 60, 0.15),
+        inset 0 0 0 1px rgba(255, 200, 210, 0.3);
+      max-height: inherit;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lightbox-frame img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      display: block;
+      object-fit: contain;
+      object-position: center;
+      background: linear-gradient(135deg, #fce4ec, #f8e8e0);
+      min-width: 0;
+      min-height: 0;
+      max-height: calc(90vh - 100px);
+      max-height: calc(90dvh - 100px);
+      flex: 0 1 auto;
+      contain: inline-size;
+    }
+
+    .lightbox-caption {
+      text-align: center;
+      padding: 1rem 0.5rem 0.5rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      color: #8b4a5e;
+      font-style: italic;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(100, 40, 60, 0.2);
+      transition: transform 0.3s ease, background 0.3s ease;
+      z-index: 10;
+    }
+
+    .lightbox-close:hover {
+      transform: scale(1.1) rotate(90deg);
+      background: #fce4ec;
+    }
+
+    .lightbox-close svg {
+      width: 14px;
+      height: 14px;
+      stroke: #8b4a5e;
+      stroke-width: 2.5;
+    }
+
+    /* ========================================================
+       BOTTOM MESSAGE SECTION
+    ======================================================== */
+    .final-message {
+      text-align: center;
+      max-width: 600px;
+      padding: 4rem 1.5rem 2rem;
+      opacity: 0;
+      animation: fadeInUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) 1.5s forwards;
+    }
+
+    .final-message .heart-icon {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+      animation: heartbeat 2s ease-in-out infinite;
+      color: #d4718a;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      15%      { transform: scale(1.15); }
+      30%      { transform: scale(1); }
+      45%      { transform: scale(1.1); }
+    }
+
+    .final-message h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 3.5vw, 2rem);
+      color: #8b4a5e;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+
+    .final-message p {
+      font-size: clamp(0.9rem, 2vw, 1rem);
+      color: #b07a8a;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    .final-message .signature {
+      margin-top: 2rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-style: italic;
+      color: #c4959f;
+    }
+
+    /* ========================================================
+       RIBBON / WRAP DECORATION AT BOUQUET BASE
+    ======================================================== */
+    .bouquet-wrap {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+    }
+
+    /* ========================================================
+       RESPONSIVE
+    ======================================================== */
+    @media (max-width: 768px) {
+      .bouquet {
+        height: 420px;
+        max-width: 100%;
+      }
+      .tulip-wrapper svg {
+        transform: scale(0.8);
+        transform-origin: bottom center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .bouquet {
+        height: 360px;
+      }
+      .tulip-wrapper svg {
+        transform: scale(0.65);
+        transform-origin: bottom center;
+      }
+      .header { padding: 2rem 1rem 1.5rem; }
+
+      .lightbox-content {
+        width: min(520px, calc(100vw - 1.25rem));
+        max-height: 85vh;
+        max-height: 85dvh;
+      }
+      .lightbox-frame {
+        padding: 8px;
+        border-radius: 12px;
+      }
+      .lightbox-frame img {
+        max-height: calc(85vh - 90px);
+        max-height: calc(85dvh - 90px);
+        border-radius: 8px;
+      }
+      .lightbox-caption {
+        padding: 0.7rem 0.5rem 0.4rem;
+        font-size: 1rem;
+      }
+    }
+
+    /* ========================================================
+       MUSIC TOGGLE BUTTON
+    ======================================================== */
+    .music-toggle {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 500;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(100, 40, 60, 0.15);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    .music-toggle:hover {
+      transform: scale(1.1);
+      background: #fce4ec;
+    }
+
+    .music-toggle svg {
+      width: 20px;
+      height: 20px;
+      fill: #8b4a5e;
+    }
+
+    .music-toggle .bar {
+      transition: transform 0.3s ease;
+      transform-origin: center center;
+    }
+
+    .music-toggle.muted .bar {
+      transform: scaleY(0.3);
+    }
+
+    /* ========================================================
+       COUNTER / PROGRESS
+    ======================================================== */
+    .bloom-counter {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #c4959f;
+      margin-top: 0.5rem;
+      opacity: 0;
+      animation: fadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) 1.3s forwards;
+      letter-spacing: 0.05em;
+    }
+
+    /* ========================================================
+       ALL-REVEALED MESSAGE
+    ======================================================== */
+    .all-revealed {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(30, 10, 15, 0);
+      pointer-events: none;
+      transition: background 1s ease;
+      backdrop-filter: blur(0px);
+      -webkit-backdrop-filter: blur(0px);
+    }
+
+    .all-revealed.active {
+      background: rgba(30, 10, 15, 0.7);
+      pointer-events: all;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .all-revealed-content {
+      text-align: center;
+      max-width: 500px;
+      padding: 3rem 2rem;
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+      transition: all 1s cubic-bezier(0.22, 1, 0.36, 1) 0.3s;
+    }
+
+    .all-revealed.active .all-revealed-content {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .all-revealed-content h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 4vw, 2.5rem);
+      color: #fff;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      line-height: 1.3;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.2);
+    }
+
+    .all-revealed-content p {
+      color: rgba(255, 220, 225, 0.9);
+      font-size: 1rem;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    .all-revealed-close {
+      margin-top: 2rem;
+      padding: 0.7rem 2rem;
+      border: 1px solid rgba(255, 200, 210, 0.4);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-radius: 30px;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+
+    .all-revealed-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 200, 210, 0.7);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated gradient background -->
+  <div class="bg-gradient"></div>
+  <div class="bg-glow"></div>
+
+  <!-- Floating sparkle particles -->
+  <div class="particles-container" id="particles"></div>
+
+  <!-- FX layer for petals (prevents page overflow/side scroll) -->
+  <div class="fx-layer" id="fxLayer"></div>
+
+  <!-- Main page wrapper -->
+  <div class="page-wrapper">
+
+    <!-- Romantic header -->
+    <header class="header">
+      <h1>Since I can't hand you real tulips, I made you ones that bloom forever.</h1>
+      <p class="subtitle">Each one holds a memory of us</p>
+      <div class="divider"></div>
+    </header>
+
+    <!-- Instruction -->
+    <p class="hint">tap a tulip to see it bloom</p>
+
+    <!-- Bloom counter -->
+    <div class="bloom-counter" id="bloomCounter">0 of 7 memories revealed</div>
+
+    <!-- Bouquet -->
+    <section class="bouquet-section">
+      <div class="bouquet" id="bouquet">
+        <!-- Tulips are generated by JS -->
+
+        <!-- Bouquet wrap / ribbon at the base -->
+        <svg class="bouquet-wrap" width="220" height="90" viewBox="0 0 220 90" fill="none">
+          <!-- Outer kraft-paper wrap -->
+          <path d="M25 12 Q110 -12 195 12 L182 78 Q110 60 38 78 Z" fill="#d4929e" opacity="0.75"/>
+          <!-- Inner lighter layer -->
+          <path d="M38 18 Q110 -2 182 18 L172 70 Q110 55 48 70 Z" fill="#e8b4bc" opacity="0.55"/>
+          <!-- Ribbon bow knot -->
+          <ellipse cx="110" cy="52" rx="20" ry="7" fill="#c07a8a" opacity="0.35"/>
+          <path d="M104 52 Q98 40 88 46 Q98 52 104 52 Z" fill="#c4899a" opacity="0.6"/>
+          <path d="M116 52 Q122 40 132 46 Q122 52 116 52 Z" fill="#c4899a" opacity="0.6"/>
+          <!-- Ribbon tails -->
+          <path d="M106 55 Q100 70 92 80" stroke="#c07a8a" stroke-width="2" fill="none" opacity="0.4" stroke-linecap="round"/>
+          <path d="M114 55 Q120 70 128 80" stroke="#c07a8a" stroke-width="2" fill="none" opacity="0.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </section>
+  </div>
+
+  <!-- Lightbox modal -->
+  <div class="lightbox-overlay" id="lightbox">
+    <div class="lightbox-content">
+      <div class="lightbox-frame">
+        <button class="lightbox-close" id="lightboxClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+        <img id="lightboxImg" src="" alt="Our memory" />
+        <div class="lightbox-caption" id="lightboxCaption"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- All-revealed celebration overlay -->
+  <div class="all-revealed" id="allRevealed">
+    <div class="all-revealed-content">
+      <h2>You found every single memory &#10084;</h2>
+      <p>
+        ... At mas marami pa tayong memories na gagawin na magkasama. Sana more pictures pa na nag-lilips tulips. Haha sorry na yan na pinakawitty na naisip ko. I LOVE YOU!
+      </p>
+      <button class="all-revealed-close" id="allRevealedClose">&#10084; I love you too</button>
+    </div>
+  </div>
+
+  <!-- Music toggle -->
+  <button class="music-toggle muted" id="musicToggle" aria-label="Toggle music">
+    <svg viewBox="0 0 24 24">
+      <rect class="bar" x="4"  y="8" width="2.5" height="8" rx="1"/>
+      <rect class="bar" x="9"  y="5" width="2.5" height="14" rx="1"/>
+      <rect class="bar" x="14" y="7" width="2.5" height="10" rx="1"/>
+      <rect class="bar" x="19" y="4" width="2.5" height="16" rx="1"/>
+    </svg>
+  </button>
+
+<script>
+/* ==========================================================
+   CONFIGURATION
+   ──────────────────────────────────────────────────────────
+   Replace the image URLs and captions below with your own.
+   Each object corresponds to one tulip in the bouquet.
+========================================================== */
+const TULIP_DATA = [
+  {
+    image: 'images/eliza-4.jpeg',
+    caption: 'Foundation Day - Sana hindi na lang ako nakawala sa posas.'
+  },
+  {
+    image: 'images/eliza-1.jpeg',
+    caption: 'High School Christmas Party. Kabado pa rin, as usual.'
+  },
+  {
+    image: 'images/eliza-2.jpeg',
+    caption: 'First picture together after 10 years!'
+  },
+  {
+    image: 'images/eliza-3.jpeg',
+    caption: 'Vidcall hanggang makatulog.'
+  },
+  {
+    image: 'images/eliza-7.jpeg',
+    caption: 'Sinundan pa nga sa Cebu!'
+  },
+  {
+    image: 'images/eliza-6.jpeg',
+    caption: 'I love you!'
+  },
+  {
+    image: 'images/eliza-5.jpeg',
+    caption: 'Until we meet again — soon ♥'
+  }
+];
+
+/* ==========================================================
+   TULIP COLOR PALETTES
+   Each tulip gets a unique but harmonizing color scheme
+========================================================== */
+const TULIP_COLORS = [
+  { outer: '#e8829a', inner: '#f4a5b8', highlight: '#fcd5de' },
+  { outer: '#d4718a', inner: '#e899ad', highlight: '#f8c8d4' },
+  { outer: '#e89590', inner: '#f2b5b0', highlight: '#fad8d5' },
+  { outer: '#d98aa0', inner: '#edb0c0', highlight: '#f8d4de' },
+  { outer: '#c97a95', inner: '#dda0b5', highlight: '#f0c8d5' },
+  { outer: '#e0808e', inner: '#eda5b0', highlight: '#f8d0d6' },
+  { outer: '#d4859e', inner: '#e8aabb', highlight: '#f5d0db' }
+];
+
+/* ==========================================================
+   TULIP POSITIONS — layout within the bouquet
+   x: horizontal offset from center, height: total tulip height
+========================================================== */
+const TULIP_POSITIONS = [
+  { x: -120, height: 340 },
+  { x: -78,  height: 380 },
+  { x: -38,  height: 400 },
+  { x: 0,    height: 420 },
+  { x: 38,   height: 395 },
+  { x: 78,   height: 370 },
+  { x: 118,  height: 345 }
+];
+
+/* ==========================================================
+   GENERATE SVG TULIP
+   Creates a detailed tulip SVG with head, stem, and leaves
+========================================================== */
+function createTulipSVG(colors, height) {
+  const stemH = height - 80;
+  return `
+    <svg class="tulip-svg" width="70" height="${height}" viewBox="0 0 70 ${height}" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Stem with a slight natural curve -->
+      <path class="tulip-stem"
+            d="M35 ${height} C34 ${height - stemH * 0.2} 36 ${height - stemH * 0.6} 35 ${height - stemH}"
+            stroke="#5a8a5a" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+
+      <!-- Left leaf -->
+      <path d="M34 ${height - stemH * 0.35}
+               Q12 ${height - stemH * 0.52} 20 ${height - stemH * 0.68}"
+            stroke="#6a9a65" stroke-width="1.8" fill="#7ab06e" fill-opacity="0.65"/>
+
+      <!-- Right leaf -->
+      <path d="M36 ${height - stemH * 0.55}
+               Q58 ${height - stemH * 0.68} 50 ${height - stemH * 0.82}"
+            stroke="#6a9a65" stroke-width="1.8" fill="#7ab06e" fill-opacity="0.65"/>
+
+      <!-- Tulip head group — transform origin at base for bloom -->
+      <g class="tulip-head" transform="translate(35, ${height - stemH - 10})">
+        <!-- Back petals (wider, darker) -->
+        <ellipse cx="-9" cy="-24" rx="15" ry="30" fill="${colors.outer}" opacity="0.8"
+                 transform="rotate(-10)"/>
+        <ellipse cx="9" cy="-24" rx="15" ry="30" fill="${colors.outer}" opacity="0.8"
+                 transform="rotate(10)"/>
+
+        <!-- Middle petals -->
+        <ellipse cx="-5" cy="-26" rx="13" ry="32" fill="${colors.inner}" opacity="0.88"
+                 transform="rotate(-4)"/>
+        <ellipse cx="5" cy="-26" rx="13" ry="32" fill="${colors.inner}" opacity="0.88"
+                 transform="rotate(4)"/>
+
+        <!-- Front highlight petal -->
+        <ellipse cx="0" cy="-25" rx="11" ry="30" fill="${colors.highlight}" opacity="0.45"/>
+
+        <!-- Inner depth shadow -->
+        <ellipse cx="0" cy="-14" rx="7" ry="10" fill="${colors.outer}" opacity="0.18"/>
+
+        <!-- Stamen dots (subtle detail) -->
+        <circle cx="-2" cy="-8" r="1.2" fill="#b8864a" opacity="0.3"/>
+        <circle cx="2"  cy="-9" r="1"   fill="#b8864a" opacity="0.25"/>
+      </g>
+    </svg>
+  `;
+}
+
+/* ==========================================================
+   BUILD BOUQUET — render all tulips into the DOM
+========================================================== */
+const bouquetEl = document.getElementById('bouquet');
+
+TULIP_DATA.forEach((data, i) => {
+  const pos = TULIP_POSITIONS[i];
+  const colors = TULIP_COLORS[i];
+  const wrapper = document.createElement('div');
+  wrapper.className = 'tulip-wrapper';
+  wrapper.dataset.index = i;
+  wrapper.style.cssText = `
+    left: calc(50% + ${pos.x}px - 35px);
+    z-index: ${10 + i};
+  `;
+  wrapper.innerHTML = createTulipSVG(colors, pos.height);
+  wrapper.addEventListener('click', () => bloomTulip(wrapper, i));
+  bouquetEl.appendChild(wrapper);
+});
+
+/* ==========================================================
+   BLOOM → EXPLODE → REVEAL PHOTO
+   Core interaction sequence:
+   1. Bloom animation (scale pulse on tulip head)
+   2. Petal explosion (colored particles fly outward)
+   3. Lightbox opens with the corresponding photo
+========================================================== */
+let bloomedCount = 0;
+const counterEl = document.getElementById('bloomCounter');
+const fxLayer = document.getElementById('fxLayer');
+
+function bloomTulip(wrapper, index) {
+  if (wrapper.classList.contains('bloomed')) return;
+  wrapper.classList.add('bloomed');
+
+  // Stop wind sway so bloom animation plays cleanly
+  wrapper.style.animation = 'none';
+
+  const head = wrapper.querySelector('.tulip-head');
+  const rect = wrapper.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + 60; // approximate head center
+
+  /* -- Step 1: Bloom pulse -- */
+  head.style.animation = 'bloomPulse 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards';
+  head.style.transformOrigin = 'center bottom';
+
+  /* -- Step 2: After bloom finishes, explode petals + fade head -- */
+  setTimeout(() => {
+    head.style.transition = 'opacity 0.4s ease';
+    head.style.opacity = '0';
+
+    createPetalExplosion(centerX, centerY, TULIP_COLORS[index]);
+
+    /* -- Step 3: Open lightbox after petals have scattered -- */
+    setTimeout(() => {
+      openLightbox(TULIP_DATA[index].image, TULIP_DATA[index].caption);
+    }, 600);
+  }, 550);
+
+  // Update counter
+  bloomedCount++;
+  counterEl.textContent = `${bloomedCount} of ${TULIP_DATA.length} memories revealed`;
+
+  // If all tulips have been bloomed, show the celebration
+  if (bloomedCount === TULIP_DATA.length) {
+    setTimeout(() => {
+      showAllRevealed();
+    }, 2500);
+  }
+}
+
+/* ==========================================================
+   PETAL EXPLOSION EFFECT
+   Spawns colored petal shapes that fly outward with easing,
+   using the Web Animations API for 60fps performance.
+========================================================== */
+function createPetalExplosion(cx, cy, colors) {
+  const petalCount = 22;
+  const palette = [colors.outer, colors.inner, colors.highlight, '#fff0f3', '#fce4ec'];
+
+  for (let i = 0; i < petalCount; i++) {
+    const petal = document.createElement('div');
+    petal.className = 'petal';
+    petal.style.left = cx + 'px';
+    petal.style.top = cy + 'px';
+    petal.style.background = palette[i % palette.length];
+
+    // Randomize petal size for organic feel
+    const size = 8 + Math.random() * 18;
+    petal.style.width = size + 'px';
+    petal.style.height = (size * 1.3) + 'px';
+    petal.style.borderRadius = `${40 + Math.random() * 20}% ${40 + Math.random() * 20}% ${30 + Math.random() * 20}% ${10 + Math.random() * 15}%`;
+
+    // Important: append into a fixed, clipped layer so petals never create page overflow
+    fxLayer.appendChild(petal);
+
+    // Random angle with upward bias
+    const angle = (Math.PI * 2 * i) / petalCount + (Math.random() - 0.5) * 0.6;
+    const velocity = 100 + Math.random() * 200;
+    const destX = Math.cos(angle) * velocity;
+    const destY = Math.sin(angle) * velocity - 80; // upward bias
+    const rotation = Math.random() * 720 - 360;
+    const duration = 700 + Math.random() * 600;
+
+    // Smooth Web Animations API keyframes
+    petal.animate([
+      {
+        transform: 'translate(-50%, -50%) scale(0) rotate(0deg)',
+        opacity: 1
+      },
+      {
+        transform: `translate(calc(-50% + ${destX * 0.6}px), calc(-50% + ${destY * 0.4}px)) scale(1.1) rotate(${rotation * 0.5}deg)`,
+        opacity: 0.9,
+        offset: 0.35
+      },
+      {
+        transform: `translate(calc(-50% + ${destX}px), calc(-50% + ${destY}px)) scale(0.6) rotate(${rotation}deg)`,
+        opacity: 0
+      }
+    ], {
+      duration: duration,
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      fill: 'forwards'
+    });
+
+    // Cleanup DOM node after animation
+    setTimeout(() => petal.remove(), duration + 100);
+  }
+}
+
+/* ==========================================================
+   LIGHTBOX — smooth photo reveal modal
+   Includes subtle parallax depth effect on mouse move
+========================================================== */
+const lightboxEl = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+const lightboxCaption = document.getElementById('lightboxCaption');
+const lightboxClose = document.getElementById('lightboxClose');
+const lightboxContent = lightboxEl.querySelector('.lightbox-content');
+
+// Guards against duplicate opens caused by multiple async triggers (onload + timeout)
+let lightboxToken = 0;
+let lightboxShowTimeoutId = null;
+
+function openLightbox(imageSrc, caption) {
+  lightboxCaption.textContent = caption;
+
+  // New "open" session: invalidate any previous pending callbacks
+  lightboxToken++;
+  const token = lightboxToken;
+
+  if (lightboxShowTimeoutId) {
+    clearTimeout(lightboxShowTimeoutId);
+    lightboxShowTimeoutId = null;
+  }
+  lightboxImg.onload = null;
+  lightboxImg.onerror = null;
+
+  // Show only once per session
+  const showOnce = () => {
+    if (token !== lightboxToken) return;
+    if (lightboxEl.classList.contains('active')) return;
+    void lightboxEl.offsetHeight; // force reflow for transition
+    lightboxEl.classList.add('active');
+  };
+
+  // If already loaded (cached), show immediately
+  if (lightboxImg.src === imageSrc && lightboxImg.complete && lightboxImg.naturalWidth > 0) {
+    showOnce();
+    return;
+  }
+
+  // Otherwise, wait for load (best) + fallback timeout (worst)
+  lightboxImg.onload = () => {
+    lightboxImg.onload = null;
+    lightboxImg.onerror = null;
+    if (lightboxShowTimeoutId) {
+      clearTimeout(lightboxShowTimeoutId);
+      lightboxShowTimeoutId = null;
+    }
+    showOnce();
+  };
+
+  lightboxImg.onerror = () => {
+    lightboxImg.onload = null;
+    lightboxImg.onerror = null;
+    if (lightboxShowTimeoutId) {
+      clearTimeout(lightboxShowTimeoutId);
+      lightboxShowTimeoutId = null;
+    }
+    showOnce();
+  };
+
+  lightboxShowTimeoutId = setTimeout(() => {
+    lightboxShowTimeoutId = null;
+    showOnce();
+  }, 1500);
+
+  lightboxImg.src = imageSrc;
+}
+
+function closeLightbox() {
+  // Invalidate any pending open callbacks so we don't re-open after close
+  lightboxToken++;
+  if (lightboxShowTimeoutId) {
+    clearTimeout(lightboxShowTimeoutId);
+    lightboxShowTimeoutId = null;
+  }
+  lightboxImg.onload = null;
+  lightboxImg.onerror = null;
+
+  lightboxEl.classList.remove('active');
+  // Reset parallax tilt (keep CSS centering/transition intact)
+  lightboxContent.style.setProperty('--tilt-x', '0deg');
+  lightboxContent.style.setProperty('--tilt-y', '0deg');
+}
+
+lightboxClose.addEventListener('click', closeLightbox);
+lightboxEl.addEventListener('click', (e) => {
+  if (e.target === lightboxEl) closeLightbox();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+/* Parallax depth tilt (desktop only) — uses CSS variables so centering is never overridden */
+const canHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+if (canHover) {
+  lightboxEl.addEventListener('mousemove', (e) => {
+    if (!lightboxEl.classList.contains('active')) return;
+    const rect = lightboxEl.getBoundingClientRect();
+    const x = (e.clientX - rect.left - rect.width / 2) / rect.width;
+    const y = (e.clientY - rect.top - rect.height / 2) / rect.height;
+    lightboxContent.style.setProperty('--tilt-y', `${x * 3}deg`);
+    lightboxContent.style.setProperty('--tilt-x', `${-y * 3}deg`);
+  });
+
+  lightboxEl.addEventListener('mouseleave', () => {
+    if (!lightboxEl.classList.contains('active')) return;
+    lightboxContent.style.setProperty('--tilt-x', '0deg');
+    lightboxContent.style.setProperty('--tilt-y', '0deg');
+  });
+}
+
+/* ==========================================================
+   ALL-REVEALED CELEBRATION
+   Shows a special overlay when every tulip has been bloomed
+========================================================== */
+const allRevealedEl = document.getElementById('allRevealed');
+const allRevealedClose = document.getElementById('allRevealedClose');
+
+function showAllRevealed() {
+  // Close lightbox first if open
+  closeLightbox();
+  setTimeout(() => {
+    allRevealedEl.classList.add('active');
+  }, 400);
+}
+
+allRevealedClose.addEventListener('click', () => {
+  allRevealedEl.classList.remove('active');
+});
+
+allRevealedEl.addEventListener('click', (e) => {
+  if (e.target === allRevealedEl) allRevealedEl.classList.remove('active');
+});
+
+/* ==========================================================
+   FLOATING PARTICLES / SPARKLES
+   Soft glowing dots that drift gently across the viewport.
+   Uses Web Animations API for smooth, GPU-accelerated motion.
+========================================================== */
+function initParticles() {
+  const container = document.getElementById('particles');
+  const count = window.innerWidth < 600 ? 18 : 35;
+
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+
+    const size = 2 + Math.random() * 5;
+    const startX = Math.random() * 100;
+    const startY = Math.random() * 100;
+    const duration = 12000 + Math.random() * 18000;
+    const delay = Math.random() * 8000;
+    const maxOpacity = 0.12 + Math.random() * 0.25;
+
+    const colors = ['#f4a5b8', '#e8829a', '#fcd5de', '#ffeef2', '#d4929e', '#fff'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+
+    p.style.cssText = `
+      width: ${size}px;
+      height: ${size}px;
+      left: ${startX}%;
+      top: ${startY}%;
+      background: ${color};
+      box-shadow: 0 0 ${size * 3}px ${color};
+      opacity: 0;
+    `;
+
+    container.appendChild(p);
+
+    // Gentle floating drift animation
+    const driftX = (Math.random() - 0.5) * 180;
+    const driftY = -40 - Math.random() * 120;
+
+    p.animate([
+      { transform: 'translate(0, 0) scale(0)',                         opacity: 0 },
+      { transform: `translate(${driftX * 0.2}px, ${driftY * 0.2}px) scale(1)`,   opacity: maxOpacity, offset: 0.15 },
+      { transform: `translate(${driftX * 0.5}px, ${driftY * 0.5}px) scale(1)`,   opacity: maxOpacity, offset: 0.5 },
+      { transform: `translate(${driftX * 0.8}px, ${driftY * 0.8}px) scale(0.8)`, opacity: maxOpacity * 0.5, offset: 0.85 },
+      { transform: `translate(${driftX}px, ${driftY}px) scale(0)`,               opacity: 0 }
+    ], {
+      duration: duration,
+      delay: delay,
+      iterations: Infinity,
+      easing: 'linear'
+    });
+  }
+}
+
+initParticles();
+
+/* ==========================================================
+   AMBIENT BACKGROUND MUSIC (Web Audio API)
+   Generates a soft, warm chord from pure sine tones.
+   Replace with an <audio> element if you have an .mp3 file:
+     <audio id="bgMusic" src="your-song.mp3" loop></audio>
+   Then toggle play/pause in the click handler below.
+========================================================== */
+let audioCtx = null;
+let isMuted = true;
+let masterGain = null;
+
+function createAmbientMusic() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  // Warm major chord: C4, E4, G4, C5 — layered sine waves
+  const notes = [261.63, 329.63, 392.00, 523.25];
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0;
+  masterGain.connect(audioCtx.destination);
+
+  notes.forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const noteGain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    noteGain.gain.value = 0.025 + (i * 0.005); // slight crescendo
+    osc.connect(noteGain);
+    noteGain.connect(masterGain);
+    osc.start();
+  });
+}
+
+const musicToggle = document.getElementById('musicToggle');
+musicToggle.addEventListener('click', () => {
+  if (!audioCtx) createAmbientMusic();
+
+  isMuted = !isMuted;
+  musicToggle.classList.toggle('muted', isMuted);
+
+  if (isMuted) {
+    masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+  } else {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    masterGain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 0.5);
+  }
+});
+
+/* ==========================================================
+   PRELOAD IMAGES
+   Start fetching images in background for instant reveals
+========================================================== */
+TULIP_DATA.forEach(data => {
+  const img = new Image();
+  img.src = data.image;
+});
+</script>
+
+</body>
+</html>
