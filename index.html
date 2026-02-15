@@ -677,16 +677,6 @@
     </div>
   </div>
 
-  <!-- Music toggle -->
-  <button class="music-toggle muted" id="musicToggle" aria-label="Toggle music">
-    <svg viewBox="0 0 24 24">
-      <rect class="bar" x="4"  y="8" width="2.5" height="8" rx="1"/>
-      <rect class="bar" x="9"  y="5" width="2.5" height="14" rx="1"/>
-      <rect class="bar" x="14" y="7" width="2.5" height="10" rx="1"/>
-      <rect class="bar" x="19" y="4" width="2.5" height="16" rx="1"/>
-    </svg>
-  </button>
-
 <script>
 /* ==========================================================
    CONFIGURATION
@@ -1127,53 +1117,6 @@ function initParticles() {
 }
 
 initParticles();
-
-/* ==========================================================
-   AMBIENT BACKGROUND MUSIC (Web Audio API)
-   Generates a soft, warm chord from pure sine tones.
-   Replace with an <audio> element if you have an .mp3 file:
-     <audio id="bgMusic" src="your-song.mp3" loop></audio>
-   Then toggle play/pause in the click handler below.
-========================================================== */
-let audioCtx = null;
-let isMuted = true;
-let masterGain = null;
-
-function createAmbientMusic() {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-  // Warm major chord: C4, E4, G4, C5 — layered sine waves
-  const notes = [261.63, 329.63, 392.00, 523.25];
-  masterGain = audioCtx.createGain();
-  masterGain.gain.value = 0;
-  masterGain.connect(audioCtx.destination);
-
-  notes.forEach((freq, i) => {
-    const osc = audioCtx.createOscillator();
-    const noteGain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = freq;
-    noteGain.gain.value = 0.025 + (i * 0.005); // slight crescendo
-    osc.connect(noteGain);
-    noteGain.connect(masterGain);
-    osc.start();
-  });
-}
-
-const musicToggle = document.getElementById('musicToggle');
-musicToggle.addEventListener('click', () => {
-  if (!audioCtx) createAmbientMusic();
-
-  isMuted = !isMuted;
-  musicToggle.classList.toggle('muted', isMuted);
-
-  if (isMuted) {
-    masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
-  } else {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    masterGain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 0.5);
-  }
-});
 
 /* ==========================================================
    PRELOAD IMAGES
